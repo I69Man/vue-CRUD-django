@@ -1,6 +1,7 @@
 <template>
   <div class="Detail">
     <h1 class="text-center mb-3">Detail</h1>
+  <div v-if="!articleNotFound">
     <article>
       <h3>{{ article.title }}</h3>
       <div>{{ article.content }}</div>
@@ -31,54 +32,64 @@
         <button class="btn btn-secondary">Edit Article</button>
       </form>
   </div>
+  <div v-else class="alert alert-warning">
+      Article Not Found
+  </div>
+  </div>
 </template>
   
 <script>
+import axios from 'axios'
 
 export default {
   name: 'Detail',
   data() {
-    let articles = localStorage.getItem("articles")
-    articles = JSON.parse(articles)
-    let article = articles.find(
-      article => article.slug == this.$route.params.slug
-    )
-    return {
-      articles: articles,
-      article: article,
-      title: article.title,
-      description: article.description,
-      content: article.content,
-      edit: false
+      return {
+      articleNotFound: false,
+      article: {},
+      // title: article.title,
+      // description: article.description,
+      // content: article.content,
+      // edit: false
     }
   },
+  mounted() {
+    axios
+      .get(`/article/${this.$route.params.slug}/`)
+         .then(res => {
+             this.article = res.data
+                        
+            }).catch(e => {
+              this.articleNotFound = true
+            })
+  },
   methods: {
-    doEdit() {
-      let index = this.articles.findIndex(
-        article => article.slug == this.$route.params.slug
-      )
-      this.articles[index] = {
-        title: this.title,
-        description: this.description,
-        content: this.content,
-        slug: this.title.replaceAll(' ',"-").toLowerCase(),
-      }
-      let database = JSON.stringify(this.articles)
-            localStorage.setItem('articles', database)
-            this.article = this.articles[index]
-            this.edit = false
-            this.$router.push(`/article/${this.articles[index].slug}`)
-    },
-    doRemove() {
-      let index = this.articles.findIndex(
-        article => article.slug == this.$route.params.slug
-      )
-      this.articles.splice(index, 1)
-      let database = JSON.stringify(this.articles)
-          localStorage.setItem('articles', database)
-          this.$router.push('/')
+    // doEdit() {
+    //   let index = this.articles.findIndex(
+    //     article => article.slug == this.$route.params.slug
+    //   )
+    //   this.articles[index] = {
+    //     title: this.title,
+    //     description: this.description,
+    //     content: this.content,
+    //     slug: this.title.replaceAll(' ',"-").toLowerCase(),
+    //   }
+    //   let database = JSON.stringify(this.articles)
+    //         localStorage.setItem('articles', database)
+    //         this.article = this.articles[index]
+    //         this.edit = false
+    //         this.$router.push(`/article/${this.articles[index].slug}`)
+    // },
+    // doRemove() {
+    //   let index = this.articles.findIndex(
+    //     article => article.slug == this.$route.params.slug
+    //   )
+    //   this.articles.splice(index, 1)
+    //   let database = JSON.stringify(this.articles)
+    //       localStorage.setItem('articles', database)
+    //       this.$router.push('/')
 
-    }
+    // }
   }
 
 }

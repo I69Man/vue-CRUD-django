@@ -44,7 +44,7 @@
     </div>
 </template>
 <script>
-import { isMemoSame } from 'vue'
+import axios from 'axios'
 
 export default {
     name: 'register',
@@ -77,13 +77,13 @@ export default {
                 this.usernameEM = ''
             }
 
-            if (this.password.length < 6) {
+            if (this.password.length < 8) {
                 this.passwordE = true
                 access = false
                 if (this.password.length === 0) {
                     this.passwordEM = 'Password empty'
                 } else {
-                    this.passwordEM = 'Password must be 6 characters'
+                    this.passwordEM = 'Password must be 8 characters'
                 }
             } else {
                 this.passwordE = false
@@ -91,13 +91,13 @@ export default {
             }
 
             //password repeat
-            if (this.password2.length < 6) {
+            if (this.password2.length < 8) {
                 this.password2E = true
                 access = false
                 if (this.password2.length === 0) {
                     this.password2EM = 'Repeat Password empty'
                 } else {
-                    this.password2EM = 'Repeat Password must be 6 characters'
+                    this.password2EM = 'Repeat Password must be 8 characters'
                 }
             } else {
                 this.password2E = false
@@ -117,8 +117,34 @@ export default {
            
 
             if (access) {
-                this.$store.commit("login", `${this.username}:${this.password}`)
-                this.$router.push('./profile')
+                axios
+                    .post('/auth/users/' , {
+                        username: this.username,
+                        password: this.password
+                    })
+                    .then(response => {
+                        console.log(response)
+                        this.$router.push('./login')
+                    })
+                    .catch(error => {
+                        console.log(error.response.data)
+                        if(error.response.data.username) {
+                            this.usernameE = true
+                            this.usernameEM = error.response.data.username.join(" ")
+                        }else if(error.response.data.password) {
+                            this.passwordE = true
+                            this.password2E = true
+                            this.passwordEM = error.response.data.password.join(" ")
+                        }
+                      
+                    })
+                
+                
+
+
+
+                // this.$store.commit("login", `${this.username}:${this.password}`)
+                // this.$router.push('./profile')
             }
         }
     }

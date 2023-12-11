@@ -45,6 +45,8 @@
     </div>
 </template>
 <script>
+import axios from 'axios'
+
 export default {
     name: 'LOgin',
     data() {
@@ -79,15 +81,30 @@ export default {
                 if (this.password.length === 0) {
                     this.passwordEM = 'Password empty'
                 } else {
-                    this.passwordEM = 'Password must be 6 characters'
+                    this.passwordEM = 'Password must be 8 characters'
                 }
             } else {
                 this.passwordE = false
                 this.passwordEM = ''
             }
             if(access) {
-                this.$store.commit("login", `${this.username}:${this.password}`)
-                this.$router.push('./profile')
+                axios
+                    .post('/auth/token/login/' , {
+                        username: this.username,
+                        password: this.password
+                    })
+                    .then(response => {
+                        this.$store.commit("login", response.data.auth_token)
+                        this.$router.push('./profile')
+                    })
+                    .catch(error => {
+                        console.log(error.response.data.non_field_errors.join(" "))
+                        this.usernameEM = error.response.data.non_field_errors.join(" ")
+                        this.usernameE = true
+                        this.passwordE = true
+                    })
+                
+                
             }
         }
     }

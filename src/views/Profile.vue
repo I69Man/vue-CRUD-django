@@ -6,5 +6,27 @@
     </div>
 </template>
 <script>
+import axios from 'axios'
+export default{
+name: 'Profile',
+
+data () {
+    return {
+        username: ''
+    }
+},
+mounted () {
+    axios
+      .get('auth/users/me/')
+         .then(res => {
+             console.log(res.data)
+                        
+            })
+            .catch(error => {
+             console.log(error.response.data)
+             })
+}
+
+}
 
 </script>
